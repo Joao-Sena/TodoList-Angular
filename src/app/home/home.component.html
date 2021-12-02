@@ -1,0 +1,109 @@
+<div class="container">
+    <div class="row">
+        <!-- COLUNA NOVO -->
+        <div class="col-12 col-md-6 col-lg-3 border-end border-white pe-4">
+            <h2 class="titulo c-primaria underline">Adicionar Tarefa</h2>
+
+            <p class="mt-0 mb-4">Adicione novas tarefas e as gerencie conforme o andamento das mesmas.</p>
+
+            <div class="card">
+                <input type="text" placeholder="Título" [(ngModel)]="titulo">
+                <textarea class="my-3" cols="10" rows="5" placeholder="Descrição da tarefa" [(ngModel)]="descricao"></textarea>
+                <button class="botao-adicionar" (click)="addTask()">
+                    <i class="bi bi-plus-lg"></i> ADICIONAR
+                </button>
+            </div>
+
+            <p class="my-4">Desenvolvido por: João Sena | 2021</p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-9 ps-5">
+            <!-- INÍCIO TO DO -->
+            <div class="row mb-4">
+                <h2 class="titulo mb-0"><i class="bi bi-bookmark"></i> To do (A fazer)</h2>
+                <div class="container-cards" *ngIf="tasksTodo && tasksTodo.length" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <div class="card-tarefa" *ngFor="let task of tasksTodo">
+                        <i class="bi bi-three-dots-vertical c-primary float-end me-2 icone-opcoes">
+                            <div class="opcoes">
+                                <span (click)="openModalEditTask(task)"><i class="bi bi-pen"></i> Editar</span>
+                                <span (click)="deleteTask(task.id)"> <i class="bi bi-trash"></i> Excluir</span>
+                            </div>
+                        </i>
+                        <h3>{{task.titulo}}</h3>
+                        <p>{{task.conteudo}}</p>
+                        <hr class="hr mb-0">
+                        <button class="botao-avancar" (click)="changeStatusTask(task, 'Doing')"><i class="bi bi-check"></i> INICIAR</button>
+                    </div>
+                </div>
+                <p class="mb-5" *ngIf="!tasksTodo || !tasksTodo.length">Você não possui tarefas pendentes. Crie uma nova preenchendo o formulário ao lado.</p>
+            </div>
+            <!-- FIM TO DO -->
+            <!-- INÍCIO DOING -->
+            <div class="row mb-4">
+                <h2 class="titulo mb-0 c-andamento"><i class="bi bi-bookmark-dash"></i> Doing (Fazendo)</h2>
+                <div class="container-cards" *ngIf="tasksDoing && tasksDoing.length">
+                    <div class="card-tarefa" *ngFor="let task of tasksDoing">
+                        <i class="bi bi-three-dots-vertical c-primary float-end me-2 icone-opcoes">
+                            <div class="opcoes">
+                                <span (click)="openModalEditTask(task)"><i class="bi bi-pen"></i> Editar</span>
+                                <span (click)="deleteTask(task.id)"> <i class="bi bi-trash"></i> Excluir</span>
+                            </div>
+                        </i>
+                        <h3>{{task.titulo}}</h3>
+                        <p>{{task.conteudo}}</p>
+                        <hr class="hr mb-0">
+                        <div class="row">
+                            <div class="col-6 mx-0">
+                                <button class="botao-retroceder" (click)="changeStatusTask(task, 'ToDo')"><i class="bi bi-arrow-left"></i> VOLTAR</button>
+                            </div>
+                            <div class="col-6 mx-0">
+                               <button class="botao-avancar" (click)="changeStatusTask(task, 'Done')"><i class="bi bi-check"></i> FINALIZAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-5" *ngIf="!tasksDoing || !tasksDoing.length">Você não possui tarefas sendo realizadas no momento. Inicie uma tarefa por fazer.</p>
+            </div>
+            <!-- FIM DOING -->
+            <!-- INÍCIO DONE -->
+            <div class="row mb-4">
+                <h2 class="titulo mb-0 c-sucesso"><i class="bi bi-bookmark-check"></i> Done (Finalizadas)</h2>
+                <div class="container-cards" *ngIf="tasksDone && tasksDone.length">
+                    <div class="card-tarefa" *ngFor="let task of tasksDone">
+                        <i class="bi bi-three-dots-vertical c-primary float-end me-2 icone-opcoes">
+                            <div class="opcoes">
+                                <span (click)="openModalEditTask(task)"><i class="bi bi-pen"></i> Editar</span>
+                                <span (click)="deleteTask(task.id)"> <i class="bi bi-trash"></i> Excluir</span>
+                            </div>
+                        </i>
+                        <h3 class="c-sucesso">{{task.titulo}}</h3>
+                        <p>{{task.conteudo}}</p>
+                        <hr class="hr mb-0">
+                        <button class="botao-retroceder" (click)="changeStatusTask(task, 'Doing')"><i class="bi bi-arrow-left"></i> VOLTAR</button>
+                    </div>
+                </div>
+                <p class="mb-5" *ngIf="!tasksDone || !tasksDone.length">Você não possui tarefas finalizadas. Finalize uma tarefa pendente.</p>
+            </div>
+            <!-- FIM DONE -->
+        </div>
+    </div>
+</div>
+
+<app-toast-sucesso [show]="showToastSucesso"></app-toast-sucesso>
+<app-toast-erro [show]="showToastErro"></app-toast-erro>
+
+<!-- MODAL - criado na mão caso tivesse alguma restrição enquanto a isso, já que decidi fazer um modal para 
+    edição para ficar algo mais dinamico, já que o UX não estava definido -->
+<div class="container-modal" id="containerModal" *ngIf="taskToEdit">
+        <div class="card card-edit">
+            <h3 class="titulo mb-0">Editar task</h3>
+            <p class="mb-4">Escolha o que deseja editar e clique em salvar</p>
+            <input type="text" placeholder="Título" [(ngModel)]="taskToEdit.titulo">
+            <textarea class="my-3" cols="10" rows="5" placeholder="Descrição da tarefa" [(ngModel)]="taskToEdit.conteudo"></textarea>
+            <button class="botao-adicionar mb-2" (click)="editTask()">
+                <i class="bi bi-check"></i> SALVAR
+            </button>
+            <button class="botao-retroceder mb-2" (click)="cancelEdit()">
+                <i class="bi bi-x-circle"></i> CANCELAR
+            </button>
+        </div>
+</div>
